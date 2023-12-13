@@ -1,3 +1,33 @@
 * 2FA in Odin
 
-** Try to been a replacement for new
+Try to been a replacement for 2FA desktop applications
+
+** How to Build using
+
+Using Nix
+
+#+begin_src bash
+
+nix develop github:haller33/odin-flake
+
+nix-shell -p lua
+
+lua first.lua
+
+#+end_src
+
+** Proposity
+
+try to have a nice and fluid 2FA application that tages and monitor digest of desktop and gets QR code and generate new digests for 2FA
+
+** Version of Programs
+
+#+begin_src bash
+ $ odin version
+ odin version dev-2023-11:ef5eb4b6
+#+end_src
+
+#+begin_src bash
+  $ lua -version
+  Lua 5.1  Copyright (C) 1994-2006 Lua.org, PUC-Rio
+#+end_src
