@@ -2,7 +2,7 @@ package twofa
 
 import "core:fmt"
 import libc "core:c"
-import lua51 "vendor:lua/5.4"
+import lua51 "vendor:lua/5.1"
 
 
 main :: proc() {
@@ -21,7 +21,7 @@ main :: proc() {
 
   fmt.println("In Odin, calling Lua\n")
 
-  int_ret: libc.int = lua51.pcall(StateL, 0, 0, 0, 0)
+  int_ret: libc.int = lua51.pcall(StateL, 0, 0, 0)
   if !(int_ret == 0) {
     fmt.println(StateL)
     lua51.L_error(StateL, "lua pcall() Failed\n")
