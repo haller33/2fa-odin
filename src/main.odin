@@ -5,6 +5,29 @@ import "core:fmt"
 import lua51 "vendor:lua/5.1"
 
 
+2fa_gen :: proc (StateL : ^lua51.State, str : cstring) -> cstring {
+
+
+  string_fun_call: cstring = str
+  lua51.getglobal(StateL, string_fun_call)
+
+  string_test: cstring = "2FASTEST"
+  lua51.pushstring(StateL, string_test)
+
+
+  int_ret = lua51.pcall(StateL, 1, 1, 0)
+  if !(int_ret == 0) {
+    fmt.println(StateL)
+    lua51.L_error(StateL, "lua pcall() Failed\n")
+  }
+
+
+  ret_fun_lua_call: cstring = lua51.tostring(StateL, 1)
+
+	return ret_fun_lua_call
+}
+
+
 main :: proc() {
 
 
