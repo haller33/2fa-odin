@@ -33,10 +33,11 @@ package ini
 
 import "core:mem"
 import "core:os"
+import runtime "core:runtime"
+import libc "core:c"
 import "core:strconv"
 import "core:strings"
 import "core:unicode/utf8"
-import runtime "core:runtime"
 
 
 Ini_File :: struct {
@@ -52,8 +53,14 @@ Parse_Data :: struct {
   p:    Parse_Proc,
 }
 
-parse :: proc(path: string, allocator := context.allocator) -> (^Ini_File, bool) {
-    context.allocator = allocator
+parse :: proc(
+  path: string,
+  allocator := context.allocator,
+) -> (
+  ^Ini_File,
+  bool,
+) {
+  context.allocator = allocator
   ini_file := new(Ini_File)
   data, ok := os.read_entire_file(path)
 
@@ -109,8 +116,15 @@ parse :: proc(path: string, allocator := context.allocator) -> (^Ini_File, bool)
 
       // Check if the section exists
       if !(current_section in ini_file.keyval) {
-          ini_file.keyval[current_section] = new(map[string]string, context.allocator)
-          ini_file.keyval[current_section]^ = make(map[string]string, 1 << runtime.MAP_MIN_LOG2_CAPACITY, context.allocator)
+        ini_file.keyval[current_section] = new(
+          map[string]string,
+          context.allocator,
+        )
+        ini_file.keyval[current_section]^ = make(
+          map[string]string,
+          1 << runtime.MAP_MIN_LOG2_CAPACITY,
+          context.allocator,
+        )
       }
 
       section_map := ini_file.keyval[current_section]
@@ -213,22 +227,22 @@ get_any_with_section :: proc(
   // @TODO: more int types?
   case int:
     tmp, ok := strconv.parse_int(section_map^[key])
-    if !ok {return false}
+    if !ok do return false
     mem.copy(data.data, &tmp, size_of(int))
 
   case uint:
     tmp, ok := strconv.parse_uint(section_map^[key], 10)
-    if !ok {return false}
+    if !ok do return false
     mem.copy(data.data, &tmp, size_of(uint))
 
   case f32:
     tmp, ok := strconv.parse_f32(section_map^[key])
-    if !ok {return false}
+    if !ok do return false
     mem.copy(data.data, &tmp, size_of(f32))
 
   case f64:
     tmp, ok := strconv.parse_f64(section_map^[key])
-    if !ok {return false}
+    if !ok do return false
     mem.copy(data.data, &tmp, size_of(f64))
 
   case bool:
