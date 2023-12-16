@@ -11,6 +11,8 @@ import c "core:c"
 import n "core:math/linalg/hlsl"
 import mem "core:mem"
 import os "core:os"
+import runtime "core:runtime"
+import strings "core:strings"
 
 import rl "vendor:raylib"
 
@@ -24,6 +26,7 @@ DEBUG_INTERFACE_WORD :: false
 TOKEN_AUTH_2FASTEST :: "2FASTEST"
 
 LUA_LIBRARY_OTP :: "./src/otp_lib.lua"
+LUA_TWOFAS_FUNCTION :: "twofa_hash_gen"
 DATABASE_DIGEST_INI :: "./src/data_digest.ini"
 
 load_lua_library :: proc(StateL: ^lua51.State, path_lua_entry: cstring) {
@@ -48,7 +51,7 @@ twofa_gen :: proc(
   ret_fun_lua_call: cstring,
 ) {
 
-  string_fun_call: cstring = "twofa_hash_gen"
+  string_fun_call: cstring = LUA_TWOFAS_FUNCTION
   lua51.getglobal(StateL, string_fun_call)
 
   string_test: cstring = digest_keygen
@@ -58,12 +61,17 @@ twofa_gen :: proc(
   int_ret: libc.int = lua51.pcall(StateL, 1, 1, 0)
   if !(int_ret == 0) {
     fmt.println(StateL)
-    lua51.L_error(StateL, "lua pcall() Failed\n")
+    lua51.L_error(StateL, "lua twofa_hash_gen() Failed\n")
   }
 
   ret_fun_lua_call = lua51.tostring(StateL, 1)
 
   return ret_fun_lua_call
+}
+
+my_string_to_cstring :: proc(cstr: string) -> (ret_cstr: cstring) {
+
+  return ret_cstr
 }
 
 
@@ -80,9 +88,6 @@ main_source :: proc(StateL: ^lua51.State) {
 
   keyfor: rl.KeyboardKey
   keyfor = rl.GetKeyPressed()
-
-
-  // os.execvp("/usr/bin/caja &", params)
 
   when INTERFACE_RAYLIB {
 
@@ -146,7 +151,27 @@ main_source :: proc(StateL: ^lua51.State) {
 
   inip, ok := ini.parse(DATABASE_DIGEST_INI, context.temp_allocator)
 
-  ret_str_gen: cstring = twofa_gen(StateL, TOKEN_AUTH_2FASTEST)
+  if !ok {
+    fmt.println("brok one")
+    os.exit(1)
+  }
+
+  val, ook := ini.get(inip, "test", "digest", string)
+
+  if !ook {
+    fmt.println("brok two")
+    os.exit(1)
+  }
+
+  fmt.println("Value of ini file :: ", val)
+
+  new_val: cstring = strings.unsafe_string_to_cstring(val)
+
+  fmt.println("NEW Value of, for digest :: ", new_val) // TODOOO: ERROR ON USING CSTRING UNSAFE CONVERTION TO PASS TO LUA
+
+  // runtime.cstring_to_string(val)
+  // ret_str_gen: cstring = twofa_gen(StateL, TOKEN_AUTH_2FASTEST)
+  ret_str_gen: cstring = twofa_gen(StateL, new_val)
   fmt.println("RET 2FA :: ", ret_str_gen)
 
 }
