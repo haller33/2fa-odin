@@ -1,10 +1,11 @@
 package twofa
 
-import "core:fmt"
 import libc "core:c"
+import "core:fmt"
 
 import lua51 "vendor:lua/5.1"
 
+import ini "../lib/odin-ini"
 
 import c "core:c"
 import n "core:math/linalg/hlsl"
@@ -23,7 +24,7 @@ DEBUG_INTERFACE_WORD :: false
 TOKEN_AUTH_2FASTEST :: "2FASTEST"
 
 LUA_LIBRARY_OTP :: "./src/otp_lib.lua"
-
+DATABASE_DIGEST_INI :: "./src/data_digest.ini"
 
 load_lua_library :: proc(StateL: ^lua51.State, path_lua_entry: cstring) {
 
@@ -110,10 +111,12 @@ main_source :: proc(StateL: ^lua51.State) {
       // rl.DrawText(string(windown_dim.y), 0, 10, 20, rl.DARKGRAY)
 
       /// handle game play velocity
+      /*
       keyfor = rl.GetKeyPressed()
       if keyfor == rl.KeyboardKey.ENTER {
 
-      } else if (keyfor >= rl.KeyboardKey.A) && (keyfor <= rl.KeyboardKey.Z) {
+      } else if (keyfor >= rl.KeyboardKey.A)
+		  && (keyfor <= rl.KeyboardKey.Z) {
 
 
       } else if keyfor == rl.KeyboardKey.BACKSPACE {
@@ -127,7 +130,8 @@ main_source :: proc(StateL: ^lua51.State) {
 
       } else if keyfor == rl.KeyboardKey.TAB {
 
-      }
+      }*/
+
 
       // Begin drawing
       rl.ClearBackground(rl.WHITE)
@@ -138,6 +142,9 @@ main_source :: proc(StateL: ^lua51.State) {
       rl.EndDrawing()
     }
   }
+
+
+  inip, ok := ini.parse(DATABASE_DIGEST_INI, context.temp_allocator)
 
   ret_str_gen: cstring = twofa_gen(StateL, TOKEN_AUTH_2FASTEST)
   fmt.println("RET 2FA :: ", ret_str_gen)
